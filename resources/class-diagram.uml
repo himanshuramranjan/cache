@@ -1,0 +1,81 @@
++-------------------+
+|      Cache        |<-----------------------------------+
+|-------------------|                                    |
+| + get(K key)      |                                    |
+| + put(K key, V)   |                                    |
++-------------------+                                    |
+        ^                                                |
+        |                                                |
+        |                                                |
++------------------------+                        +----------------------+
+|   ThreadSafeCache      |                        |   EvictionPolicy<K>  |
+|------------------------|                        |----------------------|
+| - storage: Storage<K, V> |<-------------------->| + keyAccessed(K)     |
+| - evictionPolicy: EvictionPolicy<K> |           | + evictKey(): K      |
+| - capacity: int         |                        | + removeKey(K)       |
+| - lock: Lock            |                        +----------------------+
+| + get(K)                |                                       ^
+| + put(K)                |                                       |
++------------------------+                                       |
+        ^                                                        |
+        |                                                        |
+        |                                                        |
++--------------------------+                                     |
+|    Storage<K, V>         |                                     |
+|--------------------------|                                     |
+| - map: Map<K, V>         |                                     |
+| + get(K)                 |                                     |
+| + put(K, V)              |                                     |
+| + remove(K)              |                                     |
+| + containsKey(K)         |                                     |
+| + size()                 |                                     |
++--------------------------+                                     |
+                                                                |
++-----------------------------+                                 |
+|   EvictionPolicy<K>         |<----------------------------------+
+|-----------------------------|
+| + keyAccessed(K)            |
+| + evictKey(): K             |
+| + removeKey(K)              |
++-----------------------------+
+        ^                    ^
+        |                    |
+        |                    |
++---------------------+  +-----------------------+
+|  LRUEvictionPolicy  |  |    LFUEvictionPolicy  |
+|---------------------|  |-----------------------|
+| - map: Map<K, DoublyLinkedNode<K>> |
+| - head: DoublyLinkedNode<K> |
+| - tail: DoublyLinkedNode<K> |
+| + keyAccessed(K)    |  | - keyFrequency: Map<K, Integer>  |
+| + evictKey()        |  | - freqMap: Map<Integer, LinkedHashSet<K>> |
+| + removeKey(K)      |  | - minFreq: int  |
+| + addToFront()      |  | + keyAccessed(K) |
+| + removeNode()      |  | + evictKey()     |
++---------------------+  | + removeKey()     |
+                        +-----------------------+
+
+        ^
+        |
+        |
++-----------------------------+
+|    DoublyLinkedList<K>      |
+|-----------------------------|
+| - head: DoublyLinkedNode<K> |
+| - tail: DoublyLinkedNode<K> |
+| + addFirst(DoublyLinkedNode<K>) |
+| + remove(DoublyLinkedNode<K>)  |
+| + removeLast()               |
+| + isEmpty()                  |
+| + getFirstNode()             |
++-----------------------------+
+        ^
+        |
+        |
++-----------------------------+
+|    DoublyLinkedNode<K>      |
+|-----------------------------|
+| - key: K                    |
+| - prev: DoublyLinkedNode<K> |
+| - next: DoublyLinkedNode<K> |
++-----------------------------+
