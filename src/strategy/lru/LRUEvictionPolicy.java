@@ -6,40 +6,40 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LRUEvictionPolicy<K> implements EvictionPolicy<K> {
-    private final Map<K, DoublyLinkedNode<K>> map;
-    private final DoublyLinkedList<K> list;
+    private final Map<K, DoublyLinkedNode<K>> keyToNodeMap;
+    private final DoublyLinkedList<K> lruList;
 
     public LRUEvictionPolicy() {
-        this.map = new HashMap<>();
-        this.list = new DoublyLinkedList<>();
+        this.keyToNodeMap = new HashMap<>();
+        this.lruList = new DoublyLinkedList<>();
     }
     @Override
     public void recordKeyAccess(K key) {
-        if (map.containsKey(key)) {
-            DoublyLinkedNode<K> node = map.get(key);
-            list.remove(node);
-            list.addFirst(node);
+        if (keyToNodeMap.containsKey(key)) {
+            DoublyLinkedNode<K> node = keyToNodeMap.get(key);
+            lruList.remove(node);
+            lruList.addFirst(node);
         } else {
             DoublyLinkedNode<K> newNode = new DoublyLinkedNode<>(key);
-            list.addFirst(newNode);
-            map.put(key, newNode);
+            lruList.addFirst(newNode);
+            keyToNodeMap.put(key, newNode);
         }
     }
 
     @Override
     public K evictKey() {
-        DoublyLinkedNode<K> node = list.removeLast();
+        DoublyLinkedNode<K> node = lruList.removeLast();
         if (node == null) return null;
-        map.remove(node.key);
+        keyToNodeMap.remove(node.key);
         System.out.println("Key evicted from the cache " + node.key.toString());
         return node.key;
     }
 
     @Override
     public void removeKey(K key) {
-        DoublyLinkedNode<K> node = map.remove(key);
+        DoublyLinkedNode<K> node = keyToNodeMap.remove(key);
         if (node != null) {
-            list.remove(node);
+            lruList.remove(node);
         }
     }
 }
