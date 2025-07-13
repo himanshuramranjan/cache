@@ -13,7 +13,7 @@
 |------------------------|                        |----------------------|
 | - storage: Storage<K, V> |<-------------------->| + keyAccessed(K)     |
 | - evictionPolicy: EvictionPolicy<K> |           | + evictKey(): K      |
-| - capacity: int         |                        | + removeKey(K)       |
+| - capacity: int         |                       | + removeKey(K)       |
 | - lock: Lock            |                        +----------------------+
 | + get(K)                |                                      ^
 | + put(K)                |                                      |
