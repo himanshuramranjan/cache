@@ -15,10 +15,10 @@
 | - evictionPolicy: EvictionPolicy<K> |           | + evictKey(): K      |
 | - capacity: int         |                        | + removeKey(K)       |
 | - lock: Lock            |                        +----------------------+
-| + get(K)                |                                       ^
-| + put(K)                |                                       |
-| + remove(Collection<K>) |
- +------------------------+                                       |
+| + get(K)                |                                      ^
+| + put(K)                |                                      |
+| + remove(Collection<K>) |                                      |
+ +------------------------+                                      |
         ^                                                        |
         |                                                        |
         |                                                        |
@@ -32,9 +32,9 @@
 | + containsKey(K)         |                                     |
 | + size()                 |                                     |
 +--------------------------+                                     |
-                                                                |
-+-----------------------------+                                 |
-|   EvictionPolicy<K>         |<----------------------------------+
+                                                                 |
++-----------------------------+                                  |
+|   EvictionPolicy<K>         |<---------------------------------+
 |-----------------------------|
 | + keyAccessed(K)            |
 | + evictKey(): K             |
