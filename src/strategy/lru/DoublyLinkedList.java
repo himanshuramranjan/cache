@@ -31,7 +31,7 @@ public class DoublyLinkedList<K> {
     }
 
     public boolean isEmpty() {
-        return head.next == null;
+        return head.next == tail;
     }
 
     public DoublyLinkedNode<K> getFirstNode() {
