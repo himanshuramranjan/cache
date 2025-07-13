@@ -3,6 +3,8 @@ import models.ThreadSafeCache;
 import strategy.lfu.LFUEvictionPolicy;
 import strategy.lru.LRUEvictionPolicy;
 
+import java.util.List;
+
 public class Main {
     public static void main(String[] args) {
 
@@ -22,5 +24,6 @@ public class Main {
         lfuCache.get(1);
         lfuCache.get(2);
         lfuCache.put(4, "D");
+        lfuCache.remove(List.of(4, 1));
     }
 }

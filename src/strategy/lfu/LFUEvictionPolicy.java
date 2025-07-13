@@ -54,6 +54,7 @@ public class LFUEvictionPolicy<K> implements EvictionPolicy<K> {
                 if (minFreq == freq) minFreq++;
             }
         }
+        System.out.println("Key removed from the cache " + key.toString());
         keyFrequency.remove(key);
     }
 }

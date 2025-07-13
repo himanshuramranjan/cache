@@ -1,5 +1,6 @@
 package models;
 
+import java.util.Collection;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -40,6 +41,21 @@ public class ThreadSafeCache<K, V> implements Cache<K, V> {
             }
             storage.put(key, value);
             evictionPolicy.recordKeyAccess(key);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void remove(Collection<K> keys) {
+        lock.lock();
+        try {
+            for (K key : keys) {
+                if (storage.containsKey(key)) {
+                    storage.remove(key);
+                    evictionPolicy.removeKey(key);
+                }
+            }
         } finally {
             lock.unlock();
         }
