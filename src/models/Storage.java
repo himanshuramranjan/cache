@@ -1,13 +1,13 @@
 package models;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Storage<K, V> {
     private final Map<K, V> map;
 
     public Storage() {
-        this.map = new HashMap<>();
+        this.map = new ConcurrentHashMap<>();
     }
 
     public V get(K key) {
