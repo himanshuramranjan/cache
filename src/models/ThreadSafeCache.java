@@ -21,7 +21,7 @@ public class ThreadSafeCache<K, V> implements Cache<K, V> {
         lock.lock();
         try {
             if (!storage.containsKey(key)) return null;
-            evictionPolicy.keyAccessed(key);
+            evictionPolicy.recordKeyAccess(key);
             return storage.get(key);
         } finally {
             lock.unlock();
@@ -39,7 +39,7 @@ public class ThreadSafeCache<K, V> implements Cache<K, V> {
                 }
             }
             storage.put(key, value);
-            evictionPolicy.keyAccessed(key);
+            evictionPolicy.recordKeyAccess(key);
         } finally {
             lock.unlock();
         }

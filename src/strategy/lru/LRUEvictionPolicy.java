@@ -14,7 +14,7 @@ public class LRUEvictionPolicy<K> implements EvictionPolicy<K> {
         this.list = new DoublyLinkedList<>();
     }
     @Override
-    public void keyAccessed(K key) {
+    public void recordKeyAccess(K key) {
         if (map.containsKey(key)) {
             DoublyLinkedNode<K> node = map.get(key);
             list.remove(node);

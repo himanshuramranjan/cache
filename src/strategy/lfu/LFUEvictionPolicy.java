@@ -13,7 +13,7 @@ public class LFUEvictionPolicy<K> implements EvictionPolicy<K> {
     private int minFreq = 0;
 
     @Override
-    public void keyAccessed(K key) {
+    public void recordKeyAccess(K key) {
         int freq = keyFrequency.getOrDefault(key, 0);
         keyFrequency.put(key, freq + 1);
 
