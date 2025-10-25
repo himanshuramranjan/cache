@@ -20,12 +20,8 @@ public class LFUEvictionPolicy<K> implements EvictionPolicy<K> {
         keyFrequency.put(key, freq + 1);
 
         freqVsKeysMap.computeIfAbsent(freq + 1, k -> new LinkedHashSet<>()).add(key);
-        if (freq > 0) {
-            freqVsKeysMap.get(freq).remove(key);
-            if (freqVsKeysMap.get(freq).isEmpty()) {
-                freqVsKeysMap.remove(freq);
-                if (minFreq == freq) minFreq++;
-            }
+        if (freq > 0 && freqVsKeysMap.containsKey(freq)) {
+            deleteKeyOfFrequency(key, freq);
         } else {
             minFreq = 1;
         }
@@ -50,14 +46,18 @@ public class LFUEvictionPolicy<K> implements EvictionPolicy<K> {
     public void removeKey(K key) {
         int freq = keyFrequency.getOrDefault(key, 0);
         if (freq > 0 && freqVsKeysMap.containsKey(freq)) {
-            freqVsKeysMap.get(freq).remove(key);
-            if (freqVsKeysMap.get(freq).isEmpty()) {
-                freqVsKeysMap.remove(freq);
-                if (minFreq == freq) minFreq++;
-            }
+            deleteKeyOfFrequency(key, freq);
         }
         System.out.println("Key removed from the cache " + key.toString());
         keyFrequency.remove(key);
+    }
+
+    private void deleteKeyOfFrequency(K key, int freq) {
+        freqVsKeysMap.get(freq).remove(key);
+        if (freqVsKeysMap.get(freq).isEmpty()) {
+            freqVsKeysMap.remove(freq);
+            if (minFreq == freq) minFreq++;
+        }
     }
 }
 
