@@ -12,6 +12,8 @@ public class LFUEvictionPolicy<K> implements EvictionPolicy<K> {
     private final Map<Integer, LinkedHashSet<K>> freqVsKeysMap = new HashMap<>();
     private int minFreq = 0;
 
+    
+    // Records access frequency for a key and updates internal mappings to maintain LFU ordering.
     @Override
     public void recordKeyAccess(K key) {
         int freq = keyFrequency.getOrDefault(key, 0);

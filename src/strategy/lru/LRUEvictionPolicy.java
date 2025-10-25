@@ -13,6 +13,9 @@ public class LRUEvictionPolicy<K> implements EvictionPolicy<K> {
         this.keyToNodeMap = new HashMap<>();
         this.lruList = new DoublyLinkedList<>();
     }
+
+
+// Records the access of a key by moving it to the front of the LRU list or adding it if not present.
     @Override
     public void recordKeyAccess(K key) {
         if (keyToNodeMap.containsKey(key)) {
