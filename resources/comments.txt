@@ -1,0 +1,108 @@
+LFU (Least Frequently Used) — short explanation
+What it is
+
+LFU (Least Frequently Used) is a cache eviction policy that removes the key with the smallest access frequency when space is needed.
+It favors items that are accessed often and evicts items that are rarely used.
+
+** Algorithm (high-level)
+
+Maintain a frequency count for each key.
+When a key is accessed (read or written), increment its count.
+When eviction is required, remove a key with the smallest frequency count (ties are typically broken by recency — e.g., evict the least-recently-used among those with the minimum frequency).
+
+** Core data structures
+
+key -> frequency map: quickly look up and update the frequency for a key.
+freq -> set-of-keys map: for each frequency, keep the keys that have that frequency. Using an ordered set (e.g., LinkedHashSet) lets you pick and remove a deterministic key and also implement LRU behavior among equal-frequency keys.
+minFreq integer: track the current minimum frequency present in the cache (so eviction is O(1) to find the candidate frequency bucket).
+
+** How the provided LFUEvictionPolicy.java implements this
+
+keyFrequency: HashMap<K, Integer> — stores frequency for each key.
+freqVsKeysMap: HashMap<Integer, LinkedHashSet<K>> — maps a frequency to an ordered set of keys with that frequency.
+minFreq: an int tracking the current minimum frequency among keys.
+
+Methods behavior:
+
+** recordKeyAccess(K key)
+
+Reads current frequency (0 if absent), increments it, stores back in keyFrequency.
+Adds the key to freqVsKeysMap at the new frequency bucket (creating the bucket if needed).
+If the key had a previous frequency > 0, removes it from the old frequency bucket and, if that old bucket becomes empty, deletes the bucket and updates minFreq if necessary.
+If the key is new (previous frequency 0), sets minFreq = 1.
+
+** evictKey()
+
+Looks up freqVsKeysMap at minFreq; if no bucket or empty, returns null.
+Uses the LinkedHashSet iterator to pick the first inserted key (stable tie-breaker; acts like LRU within same frequency).
+Removes the key from the set and keyFrequency, removes the bucket if it becomes empty, logs the eviction, and returns the evicted key.
+
+** removeKey(K key)
+
+Removes key from its frequency bucket and keyFrequency.
+If the bucket becomes empty and its frequency equals minFreq, increments minFreq accordingly.
+Logs the removal.
+
+** Complexity
+
+recordKeyAccess: average O(1) for HashMap and LinkedHashSet operations (amortized).
+evictKey: O(1) average to find and remove a key from the minFreq bucket.
+removeKey: O(1) average.
+Space: O(n) for maps, where n is the number of keys.
+
+
+** Edge cases and notes
+
+New keys start at frequency 1 (the implementation sets minFreq = 1 on first access).
+Ties among keys with the same frequency are resolved by insertion order in the LinkedHashSet — so the implementation approximates LFU+LRU (evict least-recently-used among the least-frequently-used).
+When freqVsKeysMap.get(freq).isEmpty(), code removes the empty bucket and may update minFreq. Care is taken to increment minFreq only when appropriate.
+evictKey returns null if no candidate exists — callers should handle this case.
+
+
+** LRU (Least Recently Used) — short explanation
+What it is
+
+LRU evicts the item that was least recently accessed when the cache needs space.
+It favors items that were used recently and removes stale ones.
+
+** Algorithm (high-level)
+
+On each access (read or write), mark the key as most-recently-used.
+When eviction is required, remove the key at the tail (the least-recently-used).
+Access and eviction operations should be O(1) to be efficient.
+
+** Core data structures
+
+A doubly-linked list to maintain access order (head = most recent, tail = least recent).
+A map from key -> node to allow O(1) lookup and movement of the node inside the list.
+
+** How the provided LRUEvictionPolicy.java implements this
+
+keyToNodeMap: Map<K, DoublyLinkedNode<K>> — HashMap mapping keys to their corresponding node in the list.
+lruList: DoublyLinkedList<K> — a custom doubly-linked list storing nodes in MRU→LRU order.
+
+** recordKeyAccess(K key)
+If the key exists, retrieve its node, remove it from the list, and re-insert it at the front (most-recent).
+If the key is new, create a new node, add it to the front, and add it to the map.
+
+** evictKey()
+Removes the node at the tail (least-recently-used) by calling lruList.removeLast().
+Removes the key from keyToNodeMap and returns the key.
+
+** removeKey(K key)
+Removes the node from the map and also removes it from the list if present.
+
+** Complexity
+
+recordKeyAccess: O(1) average — hashmap lookup + doubly-linked node removals/insertions are O(1).
+evictKey: O(1) average — directly remove tail node.
+removeKey: O(1) average.
+Space: O(n) for map + list nodes.
+
+** Edge cases and notes
+
+The implementation relies on DoublyLinkedList and DoublyLinkedNode for correct pointer updates. Null checks and correct handling of single-node and empty-list cases are essential inside those classes.
+If recordKeyAccess is called with a key already at the head, removing and re-adding is harmless but could be optimized to skip the operation.
+evictKey returns null if the cache is empty — callers should handle this.
+
+Note : Current implementation is not thread safe, (add synchronization or use concurrent data structures).
