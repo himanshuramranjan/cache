@@ -35,11 +35,7 @@ public class LFUEvictionPolicy<K> implements EvictionPolicy<K> {
         K key = it.next();
         it.remove();
         keyFrequency.remove(key);
-        if (freqVsKeysMap.get(minFreq).isEmpty()) {
-            freqVsKeysMap.remove(minFreq);
-            // no need to in minFreq here as in deleteKeyOfFrequency()
-            // because eviction is followed by insertion of new elm which will set the minFreq to 1
-        }
+        deleteKeyOfFrequency(key, minFreq);
         System.out.println("Key evicted from the cache " + key.toString());
         return key;
     }
